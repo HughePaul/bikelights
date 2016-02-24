@@ -36,18 +36,18 @@
 
 #define DEBOUNCE 100
 
-#define BREAK_TOTAL 100 // total cycle
-#define BREAK_DUTY 50 // on time
-#define BREAK_SOLID 95 // solid on time
+#define BRAKE_TOTAL 100 // total cycle
+#define BRAKE_DUTY 50 // on time
+#define BRAKE_SOLID 95 // solid on time
 
 #define FLASH_TOTAL 600 // total cycle
 #define FLASH_DUTY 300  // on time
 
-#define BREAK_BTN PORTAbits.RA3
+#define BRAKE_BTN PORTAbits.RA3
 #define LEFT_BTN PORTAbits.RA0
 #define RIGHT_BTN PORTAbits.RA1
 
-#define BREAK_LIGHT(v) PORTAbits.RA2 = v;
+#define BRAKE_LIGHT(v) PORTAbits.RA2 = v;
 #define LEFT_LIGHT(v) PORTAbits.RA5 = v;
 #define RIGHT_LIGHT(v) PORTAbits.RA4 = v;
 
@@ -57,23 +57,23 @@ unsigned char right_down = 0;
 bit left_flash = 0;
 bit right_flash = 0;
 
-unsigned char break_counter = 0;
+unsigned char brake_counter = 0;
 unsigned short flash_counter = 0;
 
 void reset() {
     left_flash = 0;
     right_flash = 0;
     flash_counter = 0;
-    break_counter = 0;
+    brake_counter = 0;
     left_down = 0;
     right_down = 0;
-    BREAK_LIGHT(0);
+    BRAKE_LIGHT(0);
     LEFT_LIGHT(0);
     RIGHT_LIGHT(0);
 }
 
 void sleepy() {
-    BREAK_LIGHT(0);
+    BRAKE_LIGHT(0);
     LEFT_LIGHT(1);
     RIGHT_LIGHT(1);
 
@@ -169,18 +169,18 @@ void main(void) {
     while(1) {
         __delay_ms(1);
 
-        // animate break light
-        if(BREAK_BTN && break_counter < BREAK_SOLID) {
-            BREAK_LIGHT(1);
+        // animate brake light
+        if(BRAKE_BTN && brake_counter < BRAKE_SOLID) {
+            BRAKE_LIGHT(1);
         }
-        else if(break_counter < BREAK_DUTY) {
-            BREAK_LIGHT(1);
+        else if(brake_counter < BRAKE_DUTY) {
+            BRAKE_LIGHT(1);
         } else {
-            BREAK_LIGHT(0);
+            BRAKE_LIGHT(0);
         }
-        break_counter++;
-        if(break_counter >= BREAK_TOTAL) {
-            break_counter = 0;
+        brake_counter++;
+        if(brake_counter >= BRAKE_TOTAL) {
+            brake_counter = 0;
         }
 
 
