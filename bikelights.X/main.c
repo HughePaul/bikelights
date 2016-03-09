@@ -31,8 +31,9 @@
 #pragma config LVP = OFF        // Low-Voltage Programming Enable (High-voltage on MCLR/VPP must be used for programming)
 
 
-#define LEFT 0
-#define RIGHT 1
+#define CANCEL 0
+#define LEFT 1
+#define RIGHT 2
 
 #define DEBOUNCE 100
 
@@ -42,6 +43,8 @@
 
 #define FLASH_TOTAL 600 // total cycle
 #define FLASH_DUTY 300  // on time
+
+#define AUTO_CANCEL 10  // cancel after this many flashes
 
 #define BRAKE_BTN PORTAbits.RA3
 #define LEFT_BTN PORTAbits.RA0
@@ -60,6 +63,8 @@ bit right_flash = 0;
 unsigned char brake_counter = 0;
 unsigned short flash_counter = 0;
 
+unsigned char auto_cancel_counter = 0;
+
 void reset() {
     left_flash = 0;
     right_flash = 0;
@@ -67,6 +72,7 @@ void reset() {
     brake_counter = 0;
     left_down = 0;
     right_down = 0;
+    auto_cancel_counter = 0;
     BRAKE_LIGHT(0);
     LEFT_LIGHT(0);
     RIGHT_LIGHT(0);
@@ -120,6 +126,7 @@ void sleepy() {
 
 void turn(const unsigned char way) {
     flash_counter = 0;
+    auto_cancel_counter = 0;
 
     // cancel flash if currently flashing
     if(left_flash || right_flash) {
@@ -179,6 +186,8 @@ void main(void) {
         // animate brake light
         if(BRAKE_BTN && brake_counter < BRAKE_SOLID) {
             BRAKE_LIGHT(1);
+            // reset auto-cancel if the brake button is down
+            auto_cancel_counter = 0;
         }
         else if(brake_counter < BRAKE_DUTY) {
             BRAKE_LIGHT(1);
@@ -230,7 +239,13 @@ void main(void) {
             flash_counter++;
             if(flash_counter >= FLASH_TOTAL) {
                 flash_counter = 0;
-            }
+
+                // increment and check auto-cancel count
+                auto_cancel_counter++;
+                if(auto_cancel_counter >= AUTO_CANCEL) {
+                    turn(CANCEL);
+                }
+           }
         }
            
     }
