@@ -37,8 +37,8 @@
 #define DEBOUNCE 100
 
 #define BRAKE_TOTAL 100 // total cycle
-#define BRAKE_DUTY 50 // on time
-#define BRAKE_SOLID 95 // solid on time
+#define BRAKE_DUTY 40 // on time
+#define BRAKE_SOLID 90 // solid on time
 
 #define FLASH_TOTAL 600 // total cycle
 #define FLASH_DUTY 300  // on time
@@ -133,7 +133,7 @@ void turn(const unsigned char way) {
     }
     if(way == RIGHT) {
         right_flash = 1;
-    }   
+    }
     return;
 }
 
@@ -169,6 +169,13 @@ void main(void) {
     while(1) {
         __delay_ms(1);
 
+        // check sleep command
+        if(LEFT_BTN && RIGHT_BTN) {
+            sleepy();
+            continue;
+        }
+
+        
         // animate brake light
         if(BRAKE_BTN && brake_counter < BRAKE_SOLID) {
             BRAKE_LIGHT(1);
@@ -184,36 +191,26 @@ void main(void) {
         }
 
 
-        // detect left button edges
-        if(LEFT_BTN) {
+        // detect left button rising edge with debounce
+        if(LEFT_BTN && !left_down) {
             left_down = DEBOUNCE;
+            turn(LEFT);
         }
-        else if(!LEFT_BTN && left_down) {
+        if(!LEFT_BTN && left_down) {
             left_down--;
-            if(!left_down) {
-                // debounced falling edge
-                turn(LEFT);
-            }
         }
 
-        // detect right button edges
-        if(RIGHT_BTN) {
+        
+        // detect right button rising edge with debounce
+        if(RIGHT_BTN && !right_down) {
             right_down = DEBOUNCE;
+            turn(RIGHT);
         }
-        else if(!LEFT_BTN && right_down) {
+        if(!RIGHT_BTN && right_down) {
             right_down--;
-            if(!right_down) {
-                // debounced falling edge
-                turn(RIGHT);
-            }
         }
 
-        // check sleep command
-        if(LEFT_BTN && RIGHT_BTN) {
-            sleepy();
-            continue;
-        }
-
+        
         // animate left light
         if(left_flash && flash_counter < FLASH_DUTY) {
             LEFT_LIGHT(1);
